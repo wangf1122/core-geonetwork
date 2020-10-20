@@ -473,7 +473,14 @@ public class BaseMetadataUtils implements IMetadataUtils {
         // READONLYMODE
         if (!srvContext.getBean(NodeInfo.class).isReadOnly()) {
             int iId = Integer.parseInt(id);
-            metadataRepository.incrementPopularity(iId);
+            metadataRepository.update(iId, new Updater<Metadata>() {
+                @Override
+                public void apply(Metadata entity) {
+                    entity.getDataInfo().setPopularity(
+                        entity.getDataInfo().getPopularity() + 1
+                    );
+                }
+            });
             final java.util.Optional<Metadata> metadata = metadataRepository.findById(iId);
 
             if (metadata.isPresent()) {
@@ -483,9 +490,6 @@ public class BaseMetadataUtils implements IMetadataUtils {
                     metadata.get().getDataInfo().getPopularity());
 
             }
-//            // And register the metadata to be indexed in the near future
-//            final IndexingList list = srvContext.getBean(IndexingList.class);
-//            list.add(iId);
         } else {
             if (Log.isDebugEnabled(Geonet.DATA_MANAGER)) {
                 Log.debug(Geonet.DATA_MANAGER,
