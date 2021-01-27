@@ -28,13 +28,17 @@ import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
+import org.fao.geonet.constants.Geonet;
 import org.fao.geonet.domain.*;
 import org.fao.geonet.kernel.security.GeonetworkAuthenticationProvider;
 import org.fao.geonet.repository.GroupRepository;
+import org.fao.geonet.repository.LanguageRepository;
 import org.fao.geonet.repository.UserGroupRepository;
 import org.fao.geonet.repository.UserRepository;
 import org.fao.geonet.repository.specification.UserGroupSpecs;
+import org.fao.geonet.utils.Log;
 import org.keycloak.KeycloakPrincipal;
+import org.keycloak.adapters.AdapterDeploymentContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -51,6 +55,9 @@ public class KeycloakUserUtils {
     private GroupRepository groupRepository;
 
     @Autowired
+    private LanguageRepository langRepository;
+
+    @Autowired
     private UserGroupRepository userGroupRepository;
 
     @Autowired
@@ -59,6 +66,8 @@ public class KeycloakUserUtils {
     @Autowired
     private KeycloakConfiguration keycloakConfiguration;
 
+    @Autowired
+    AdapterDeploymentContext adapterDeploymentContext;
     /**
      * @return the inserted/updated user or null if no valid user found or any error
      * happened
@@ -72,10 +81,11 @@ public class KeycloakUserUtils {
         Set<String> roleGroupList = new HashSet<>();
         // Get role that are in the format of group:role format access
         // Todo Reevaluate to see if this is how we want to get role groups. It may not be a good idea to place separator in group name and parse it this way.
-        if (keycloakPrincipal.getKeycloakSecurityContext().getToken().getResourceAccess(keycloakPrincipal.getKeycloakSecurityContext().getToken().issuedFor) != null) {
-            for (String role : keycloakPrincipal.getKeycloakSecurityContext().getToken().getResourceAccess(keycloakPrincipal.getKeycloakSecurityContext().getToken().issuedFor).getRoles()) {
+        if (keycloakPrincipal.getKeycloakSecurityContext().getToken().getResourceAccess(adapterDeploymentContext.resolveDeployment(null).getResourceName()) != null) {
+            for (String role : keycloakPrincipal.getKeycloakSecurityContext().getToken().getResourceAccess(adapterDeploymentContext.resolveDeployment(null).getResourceName()).getRoles()) {
                 // Only use the profiles we know off
                 if (role.contains(roleGroupSeparator)) {
+                    Log.debug(Geonet.SECURITY, "Identified role " + role + " from user token.");
                     roleGroupList.add(role);
                 }
             }
@@ -92,6 +102,7 @@ public class KeycloakUserUtils {
                 user = new User();
                 user.setUsername(baselUser.getUsername());
                 newUserFlag = true;
+                Log.debug(Geonet.SECURITY, "Adding a new user: " + user);
             }
 
             if (!StringUtils.isEmpty(baselUser.getSurname())) {
@@ -167,6 +178,12 @@ public class KeycloakUserUtils {
             if (group == null) {
                 group = new Group();
                 group.setName(rgGroup);
+
+                // Populate languages for the group
+                for (Language l : langRepository.findAll()) {
+                    group.getLabelTranslations().put(l.getId(), group.getName());
+                }
+
                 groupRepository.save(group);
             }
 
@@ -271,8 +288,8 @@ public class KeycloakUserUtils {
                 Set<String> profileSet = new HashSet<>();
 
                 // Get role access
-                if (keycloakPrincipal.getKeycloakSecurityContext().getToken().getResourceAccess(keycloakPrincipal.getKeycloakSecurityContext().getToken().issuedFor) != null) {
-                    for (String role : keycloakPrincipal.getKeycloakSecurityContext().getToken().getResourceAccess(keycloakPrincipal.getKeycloakSecurityContext().getToken().issuedFor).getRoles()) {
+                if (keycloakPrincipal.getKeycloakSecurityContext().getToken().getResourceAccess(adapterDeploymentContext.resolveDeployment(null).getResourceName()) != null) {
+                    for (String role : keycloakPrincipal.getKeycloakSecurityContext().getToken().getResourceAccess(adapterDeploymentContext.resolveDeployment(null).getResourceName()).getRoles()) {
                         // Only use the profiles we know off
                         if (Profile.findProfileIgnoreCase(role) != null) {
                             profileSet.add(role);
