@@ -124,7 +124,7 @@ public class KeycloakConfiguration implements SecurityProviderConfiguration {
 
     @Override
     public boolean isUserProfileUpdateEnabled() {
-        return !updateGroup && !updateProfile;
+        return updateGroup || updateProfile;
     }
 
     public void setLoginType(String loginType) {
