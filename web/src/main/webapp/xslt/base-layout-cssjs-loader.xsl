@@ -279,6 +279,14 @@
     <xsl:if test="$angularApp = 'gn_editor' or $angularApp = 'gn_admin'">
       <script type="text/javascript" src="{$uiResourcesPath}lib/ace/ace.js?v={$buildNumber}"></script>
       <script type="text/javascript" src="{$uiResourcesPath}lib/angular.ext/ui-ace.js?v={$buildNumber}"></script>
+
+      <script type="text/javascript">
+        var module = angular.module('<xsl:value-of select="$angularApp"/>');
+        module.config(['gnGlobalSettings',
+        function(gnGlobalSettings) {
+        gnGlobalSettings.isUserProfileUpdateEnabled = <xsl:value-of select="$isUserProfileUpdateEnabled"/>;
+        }]);
+      </script>
     </xsl:if>
 
 

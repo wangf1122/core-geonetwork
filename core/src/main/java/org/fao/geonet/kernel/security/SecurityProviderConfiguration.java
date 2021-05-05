@@ -79,6 +79,8 @@ public interface SecurityProviderConfiguration {
 
 	String getSecurityProvider();
 
+    boolean isUserProfileUpdateEnabled();
+
 	/**
 	 * Check if sso is enabled
 	 */

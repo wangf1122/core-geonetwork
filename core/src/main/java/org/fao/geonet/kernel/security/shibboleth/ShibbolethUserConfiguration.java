@@ -199,7 +199,13 @@ public class ShibbolethUserConfiguration implements SecurityProviderConfiguratio
 		return SECURITY_PROVIDER;
 	}
 
-	@Override
+    @Override
+    public boolean isUserProfileUpdateEnabled() {
+        //TODO: Confirm the logic if user profile editing should be enabled or not.
+        return true;
+    }
+
+    @Override
 	public String getLoginType() {
         if (this.hideLogin) {
             return LoginType.AUTOLOGIN.toString();

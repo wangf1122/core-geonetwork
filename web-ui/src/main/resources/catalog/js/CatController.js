@@ -1005,6 +1005,7 @@ goog.require('gn_alert');
       $scope.isDebug = window.location.search.indexOf('debug') !== -1;
       $scope.isDisableLoginForm = gnGlobalSettings.isDisableLoginForm;
       $scope.isShowLoginAsLink = gnGlobalSettings.isShowLoginAsLink;
+      $scope.isUserProfileUpdateEnabled = gnGlobalSettings.isUserProfileUpdateEnabled;
       $scope.isExternalViewerEnabled = gnExternalViewer.isEnabled();
       $scope.externalViewerUrl = gnExternalViewer.getBaseUrl();
 

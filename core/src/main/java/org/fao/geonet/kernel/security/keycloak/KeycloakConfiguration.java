@@ -122,6 +122,11 @@ public class KeycloakConfiguration implements SecurityProviderConfiguration {
         return loginType;
     }
 
+    @Override
+    public boolean isUserProfileUpdateEnabled() {
+        return !updateGroup && !updateProfile;
+    }
+
     public void setLoginType(String loginType) {
         LoginType parsedLoginType = parse(loginType);
         switch(parsedLoginType) {
